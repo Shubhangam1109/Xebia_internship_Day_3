@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduTrack — Student Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f172a; --ink2: #475569; --ink3: #94a3b8;
+    --surf: #ffffff; --surf2: #f8fafc; --surf3: #f1f5f9;
+    --border: #e2e8f0; --border2: #cbd5e1;
+    --accent: #2563eb; --accent-l: #eff6ff; --accent-d: #1d4ed8;
+    --green: #16a34a; --green-l: #f0fdf4;
+    --amber: #d97706; --amber-l: #fffbeb;
+    --red: #dc2626; --red-l: #fef2f2;
+    --purple: #7c3aed; --purple-l: #f5f3ff;
+    --r: 10px; --rs: 6px;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--surf2);
+    color: var(--ink);
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* ── AUTH ── */
+  .auth-page {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--surf2);
+    padding: 2rem;
+  }
+
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 2rem;
+  }
+  .brand-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-icon i { color: var(--accent); font-size: 20px; }
+  .brand-name { font-size: 20px; font-weight: 600; color: var(--ink); letter-spacing: -0.3px; }
+  .brand-sub { font-size: 11px; color: var(--ink3); letter-spacing: 0.8px; text-transform: uppercase; margin-top: 1px; }
+
+  .auth-card {
+    background: var(--surf);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.25rem 2rem;
+    width: 100%;
+    max-width: 420px;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .auth-title { font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: 4px; letter-spacing: -0.4px; }
+  .auth-sub { font-size: 13px; color: var(--ink3); margin-bottom: 1.75rem; font-weight: 300; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 5px; }
+  .form-label { font-size: 11px; font-weight: 500; color: var(--ink2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input, .form-select {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--rs);
+    font-size: 13px;
+    font-family: 'Sora', sans-serif;
+    color: var(--ink);
+    background: var(--surf2);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+  .form-input:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  }
+  .form-input::placeholder { color: var(--ink3); }
+
+  .strength-bar { display: flex; gap: 4px; margin-top: 5px; }
+  .s-seg { height: 3px; flex: 1; border-radius: 3px; background: var(--surf3); transition: background 0.2s; }
+  .s-weak { background: var(--red); }
+  .s-ok { background: var(--amber); }
+  .s-strong { background: var(--green); }
+
+  .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink2); margin-bottom: 1rem; }
+  .check-row input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+
+  .btn-full {
+    width: 100%; padding: 11px; border-radius: var(--rs);
+    font-size: 14px; font-weight: 500; font-family: 'Sora', sans-serif;
+    cursor: pointer; border: none; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary-full { background: var(--ink); color: #fff; }
+  .btn-primary-full:hover { background: #1e293b; }
+  .btn-primary-full:active { transform: scale(0.98); }
+
+  .error-box {
+    background: var(--red-l); border: 1px solid #fecaca; color: var(--red);
+    font-size: 13px; padding: 10px 12px; border-radius: var(--rs);
+    margin-bottom: 1rem; display: none;
+  }
+  .error-box.show { display: block; }
+
+  .auth-footer { text-align: center; margin-top: 1.25rem; font-size: 13px; color: var(--ink3); }
+  .auth-footer a { color: var(--accent); cursor: pointer; font-weight: 500; text-decoration: none; }
+  .auth-footer a:hover { text-decoration: underline; }
+
+  .divider {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; color: var(--ink3); margin: 1.25rem 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── DASHBOARD ── */
+  .dash-screen { flex-direction: row; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px; min-height: 100vh; background: var(--ink);
+    display: flex; flex-direction: column; padding: 1.5rem 0; flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 0 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.07);
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-brand .brand-icon { width: 32px; height: 32px; border-radius: 8px; }
+  .sidebar-brand .brand-icon i { font-size: 17px; }
+  .sidebar-brand .brand-name { font-size: 17px; color: #fff; }
+
+  .nav-section { font-size: 10px; color: rgba(255,255,255,0.25); letter-spacing: 1px; text-transform: uppercase; padding: 0 1.25rem; margin-bottom: 6px; margin-top: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 1.25rem; font-size: 13px;
+    color: rgba(255,255,255,0.5); cursor: pointer;
+    transition: all 0.15s; border-left: 2px solid transparent;
+  }
+  .nav-item i { font-size: 17px; }
+  .nav-item:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
+  .nav-item.active { color: #fff; background: rgba(37,99,235,0.2); border-left-color: var(--accent); }
+
+  .sidebar-spacer { flex: 1; }
+
+  .sidebar-user {
+    margin: 0 12px; padding: 10px 12px; border-radius: 8px;
+    background: rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .sidebar-user:hover { background: rgba(255,255,255,0.1); }
+  .user-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0;
+  }
+  .user-name { font-size: 13px; color: #fff; font-weight: 500; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+  .logout-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 1.25rem; margin-bottom: 10px;
+    font-size: 13px; color: rgba(255,255,255,0.4);
+    cursor: pointer; background: none; border: none;
+    font-family: 'Sora', sans-serif; transition: color 0.15s;
+    width: 100%;
+  }
+  .logout-btn:hover { color: var(--red); }
+  .logout-btn i { font-size: 16px; }
+
+  /* Main content */
+  .dash-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar {
+    background: var(--surf); border-bottom: 1px solid var(--border);
+    padding: 14px 24px; display: flex; align-items: center; gap: 14px;
+  }
+  .topbar-title { font-size: 16px; font-weight: 600; color: var(--ink); flex: 1; }
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--surf2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--ink2); transition: all 0.15s; font-size: 18px;
+  }
+  .icon-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .notif-wrap { position: relative; }
+  .notif-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--red);
+    position: absolute; top: 7px; right: 7px; border: 1.5px solid var(--surf2);
+  }
+
+  .dash-content { flex: 1; padding: 24px; overflow-y: auto; }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--surf); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 16px 18px;
+  }
+  .stat-icon { font-size: 22px; margin-bottom: 10px; }
+  .stat-label { font-size: 12px; color: var(--ink3); margin-bottom: 6px; }
+  .stat-val { font-size: 26px; font-weight: 600; color: var(--ink); font-family: 'JetBrains Mono', monospace; line-height: 1; }
+  .stat-change { font-size: 12px; margin-top: 5px; }
+  .stat-up { color: var(--green); }
+  .stat-down { color: var(--red); }
+
+  /* Charts row */
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .chart-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
+  .chart-title { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 16px; }
+
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 110px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar { width: 100%; border-radius: 5px 5px 0 0; background: var(--ink); opacity: 0.12; cursor: default; transition: opacity 0.2s; }
+  .bar.hi { opacity: 1; background: var(--accent); }
+  .bar:hover { opacity: 0.55; }
+  .bar-lbl { font-size: 10px; color: var(--ink3); }
+
+  .donut-wrap { display: flex; align-items: center; gap: 16px; }
+  .legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink2); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Table */
+  .table-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+  .table-head { padding: 14px 18px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .table-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11px; color: var(--ink3); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; padding: 10px 18px; border-bottom: 1px solid var(--border); background: var(--surf2); }
+  td { padding: 11px 18px; border-bottom: 1px solid var(--border); color: var(--ink); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surf2); }
+
+  .row-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; color: #fff;
+    margin-right: 8px; vertical-align: middle; flex-shrink: 0;
+  }
+
+  .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .badge-green { background: var(--green-l); color: var(--green); }
+  .badge-amber { background: var(--amber-l); color: var(--amber); }
+  .badge-red { background: var(--red-l); color: var(--red); }
+  .badge-blue { background: var(--accent-l); color: var(--accent); }
+
+  .att-bar { height: 5px; border-radius: 3px; background: var(--surf3); display: inline-block; vertical-align: middle; margin-right: 5px; overflow: hidden; }
+  .att-fill { height: 100%; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ===== REGISTRATION ===== -->
+<div class="screen active" id="screen-register">
+  <div class="auth-page">
+    <div class="brand">
+      <div class="brand-icon"><i class="ti ti-school"></i></div>
+      <div>
+        <div class="brand-name">EduTrack</div>
+        <div class="brand-sub">Student Management</div>
+      </div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-title">Create an account</div>
+      <div class="auth-sub">Join EduTrack and manage your institution.</div>
+      <div class="error-box" id="reg-error">Please fill in all fields correctly and accept the terms.</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First name</label>
+          <input class="form-input" id="r-fname" type="text" placeholder="Shubhangam">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input class="form-input" id="r-lname" type="text" placeholder="Sharma">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" id="r-email" type="email" placeholder="admin@school.edu">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select class="form-select" id="r-role">
+          <option>Administrator</option>
+          <option>Teacher</option>
+          <option>Staff</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="r-pass" type="password" placeholder="Min. 8 characters" oninput="strengthCheck(this.value)">
+        <div class="strength-bar">
+          <div class="s-seg" id="ss1"></div>
+          <div class="s-seg" id="ss2"></div>
+          <div class="s-seg" id="ss3"></div>
+          <div class="s-seg" id="ss4"></div>
+        </div>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="r-terms">
+        <label for="r-terms" style="cursor:pointer">I agree to the <a href="#" style="color:var(--accent)">Terms of Service</a> and <a href="#" style="color:var(--accent)">Privacy Policy</a></label>
+      </div>
+      <button class="btn-full btn-primary-full" onclick="doRegister()">
+        <i class="ti ti-user-plus"></i> Create account
+      </button>
+    </div>
+    <div class="auth-footer">Already have an account? <a onclick="goTo('screen-login')">Sign in</a></div>
+  </div>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div class="screen" id="screen-login">
+  <div class="auth-page">
+    <div class="brand">
+      <div class="brand-icon"><i class="ti ti-school"></i></div>
+      <div>
+        <div class="brand-name">EduTrack</div>
+        <div class="brand-sub">Student Management</div>
+      </div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Sign in to your EduTrack workspace.</div>
+      <div class="error-box" id="login-error">Invalid email or password. Please try again.</div>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" id="l-email" type="email" placeholder="admin@school.edu">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="l-pass" type="password" placeholder="••••••••">
+      </div>
+      <div style="text-align:right;margin:-0.5rem 0 1rem">
+        <a href="#" style="font-size:12px;color:var(--accent)">Forgot password?</a>
+      </div>
+      <button class="btn-full btn-primary-full" onclick="doLogin()">
+        <i class="ti ti-login"></i> Sign in
+      </button>
+      <div class="divider">or continue with</div>
+      <button class="btn-full" style="border:1px solid var(--border);background:var(--surf);color:var(--ink);font-family:'Sora',sans-serif;font-size:13px;padding:10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+        <i class="ti ti-brand-google"></i> Sign in with Google
+      </button>
+      <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--ink3)">Demo: use any registered account or <strong>demo@school.edu / demo1234</strong></div>
+    </div>
+    <div class="auth-footer">Don't have an account? <a onclick="goTo('screen-register')">Register</a></div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div class="screen dash-screen" id="screen-dashboard">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i class="ti ti-school"></i></div>
+      <div class="brand-name">EduTrack</div>
+    </div>
+    <div class="nav-section">Main</div>
+    <div class="nav-item active"><i class="ti ti-layout-dashboard"></i> Overview</div>
+    <div class="nav-item"><i class="ti ti-users"></i> Students</div>
+    <div class="nav-item"><i class="ti ti-chart-bar"></i> Grades</div>
+    <div class="nav-item"><i class="ti ti-calendar-check"></i> Attendance</div>
+    <div class="nav-section" style="margin-top:12px">Admin</div>
+    <div class="nav-item"><i class="ti ti-building-school"></i> Classes</div>
+    <div class="nav-item"><i class="ti ti-report"></i> Reports</div>
+    <div class="nav-item"><i class="ti ti-settings"></i> Settings</div>
+    <div class="sidebar-spacer"></div>
+    <button class="logout-btn" onclick="doLogout()">
+      <i class="ti ti-logout"></i> Sign out
+    </button>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="d-avatar">AD</div>
+      <div>
+        <div class="user-name" id="d-name">Admin User</div>
+        <div class="user-role" id="d-role">Administrator</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+    <div class="topbar">
+      <div class="topbar-title">Welcome back, <span id="d-greeting">Admin</span> 👋</div>
+      <div class="topbar-actions">
+        <div class="notif-wrap">
+          <div class="icon-btn"><i class="ti ti-bell"></i></div>
+          <div class="notif-dot"></div>
+        </div>
+        <div class="icon-btn"><i class="ti ti-search"></i></div>
+        <div class="icon-btn"><i class="ti ti-settings"></i></div>
+      </div>
+    </div>
+
+    <div class="dash-content">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="color:var(--accent)"><i class="ti ti-users"></i></div>
+          <div class="stat-label">Total students</div>
+          <div class="stat-val">1,284</div>
+          <div class="stat-change stat-up"><i class="ti ti-trending-up"></i> +34 this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color:var(--green)"><i class="ti ti-calendar-check"></i></div>
+          <div class="stat-label">Avg attendance</div>
+          <div class="stat-val">91.4%</div>
+          <div class="stat-change stat-up"><i class="ti ti-trending-up"></i> +2.1% vs last term</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color:var(--amber)"><i class="ti ti-award"></i></div>
+          <div class="stat-label">Avg GPA</div>
+          <div class="stat-val">3.42</div>
+          <div class="stat-change stat-down"><i class="ti ti-trending-down"></i> -0.08 vs last term</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="color:var(--purple)"><i class="ti ti-building-school"></i></div>
+          <div class="stat-label">Active classes</div>
+          <div class="stat-val">48</div>
+          <div class="stat-change stat-up"><i class="ti ti-trending-up"></i> +4 new this year</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Monthly enrollments</div>
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar" style="height:55px"></div><div class="bar-lbl">Jan</div></div>
+            <div class="bar-col"><div class="bar" style="height:68px"></div><div class="bar-lbl">Feb</div></div>
+            <div class="bar-col"><div class="bar" style="height:45px"></div><div class="bar-lbl">Mar</div></div>
+            <div class="bar-col"><div class="bar" style="height:80px"></div><div class="bar-lbl">Apr</div></div>
+            <div class="bar-col"><div class="bar" style="height:72px"></div><div class="bar-lbl">May</div></div>
+            <div class="bar-col"><div class="bar" style="height:60px"></div><div class="bar-lbl">Jun</div></div>
+            <div class="bar-col"><div class="bar" style="height:88px"></div><div class="bar-lbl">Jul</div></div>
+            <div class="bar-col"><div class="bar" style="height:75px"></div><div class="bar-lbl">Aug</div></div>
+            <div class="bar-col"><div class="bar" style="height:91px"></div><div class="bar-lbl">Sep</div></div>
+            <div class="bar-col"><div class="bar" style="height:83px"></div><div class="bar-lbl">Oct</div></div>
+            <div class="bar-col"><div class="bar" style="height:97px"></div><div class="bar-lbl">Nov</div></div>
+            <div class="bar-col"><div class="bar hi" style="height:110px"></div><div class="bar-lbl" style="color:var(--accent);font-weight:500">Dec</div></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Grade distribution</div>
+          <div class="donut-wrap">
+            <svg width="100" height="100" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f1f5f9" stroke-width="4"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#2563eb" stroke-width="4" stroke-dasharray="42 58" stroke-dashoffset="25"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#16a34a" stroke-width="4" stroke-dasharray="28 72" stroke-dashoffset="-17"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#d97706" stroke-width="4" stroke-dasharray="18 82" stroke-dashoffset="-45"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#dc2626" stroke-width="4" stroke-dasharray="12 88" stroke-dashoffset="-63"/>
+            </svg>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#2563eb"></div>A grade — 42%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>B grade — 28%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div>C grade — 18%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>D grade — 12%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent students table -->
+      <div class="table-card">
+        <div class="table-head">
+          <div class="table-title">Recent students</div>
+          <span style="font-size:12px;color:var(--ink3)">Showing 6 of 1,284</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>ID</th>
+              <th>Class</th>
+              <th>GPA</th>
+              <th>Attendance</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="row-avatar" style="background:#2563eb">SR</span>Sofia Reyes</td>
+              <td style="color:var(--ink3);font-family:'JetBrains Mono',monospace;font-size:12px">S-0041</td>
+              <td>Class A</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-weight:500">3.8</td>
+              <td><div class="att-bar" style="width:70px"><div class="att-fill" style="width:96%;background:var(--green)"></div></div>96%</td>
+              <td><span class="badge badge-green">Active</span></td>
+            </tr>
+            <tr>
+              <td><span class="row-avatar" style="background:#7c3aed">JK</span>James Kim</td>
+              <td style="color:var(--ink3);font-family:'JetBrains Mono',monospace;font-size:12px">S-0042</td>
+              <td>Class B</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-weight:500">3.2</td>
+              <td><div class="att-bar" style="width:70px"><div class="att-fill" style="width:82%;background:var(--amber)"></div></div>82%</td>
+              <td><span class="badge badge-green">Active</span></td>
+            </tr>
+            <tr>
+              <td><span class="row-avatar" style="background:#db2777">ML</span>Maria Lopez</td>
+              <td style="color:var(--ink3);font-family:'JetBrains Mono',monospace;font-size:12px">S-0043</td>
+              <td>Class A</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-weight:500">3.9</td>
+              <td><div class="att-bar" style="width:70px"><div class="att-fill" style="width:99%;background:var(--green)"></div></div>99%</td>
+              <td><span class="badge badge-green">Active</span></td>
+            </tr>
+            <tr>
+              <td><span class="row-avatar" style="background:#d97706">DP</span>Dev Patel</td>
+              <td style="color:var(--ink3);font-family:'JetBrains Mono',monospace;font-size:12px">S-0044</td>
+              <td>Class C</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-weight:500">2.7</td>
+              <td><div class="att-bar" style="width:70px"><div class="att-fill" style="width:71%;background:var(--amber)"></div></div>71%</td>
+              <td><span class="badge badge-amber">Inactive</span></td>
+            </tr>
+            <tr>
+              <td><span class="row-avatar" style="background:#16a34a">EO</span>Emma Osei</td>
+              <td style="color:var(--ink3);font-family:'JetBrains Mono',monospace;font-size:12px">S-0045</td>
+              <td>Class B</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-weight:500">3.5</td>
+              <td><div class="att-bar" style="width:70px"><div class="att-fill" style="width:90%;background:var(--green)"></div></div>90%</td>
+              <td><span class="badge badge-green">Active</span></td>
+            </tr>
+            <tr>
+              <td><span class="row-avatar" style="background:#0891b2">AK</span>Aryan Khan</td>
+              <td style="color:var(--ink3);font-family:'JetBrains Mono',monospace;font-size:12px">S-0046</td>
+              <td>Class A</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-weight:500">2.3</td>
+              <td><div class="att-bar" style="width:70px"><div class="att-fill" style="width:58%;background:var(--red)"></div></div>58%</td>
+              <td><span class="badge badge-red">Suspended</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const users = [];
+
+  function goTo(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function strengthCheck(val) {
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const cls = score <= 1 ? 's-weak' : score <= 2 ? 's-ok' : 's-strong';
+    ['ss1','ss2','ss3','ss4'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.className = 's-seg';
+      if (i < score) el.classList.add(cls);
+    });
+  }
+
+  function doRegister() {
+    const fn = document.getElementById('r-fname').value.trim();
+    const ln = document.getElementById('r-lname').value.trim();
+    const em = document.getElementById('r-email').value.trim();
+    const pw = document.getElementById('r-pass').value;
+    const role = document.getElementById('r-role').value;
+    const tc = document.getElementById('r-terms').checked;
+    const err = document.getElementById('reg-error');
+    if (!fn || !ln || !em.includes('@') || pw.length < 6 || !tc) {
+      err.classList.add('show'); return;
+    }
+    err.classList.remove('show');
+    users.push({ fname: fn, lname: ln, email: em, password: pw, role });
+    document.getElementById('r-fname').value = '';
+    document.getElementById('r-lname').value = '';
+    document.getElementById('r-email').value = '';
+    document.getElementById('r-pass').value = '';
+    document.getElementById('r-terms').checked = false;
+    strengthCheck('');
+    goTo('screen-login');
+  }
+
+  function doLogin() {
+    const em = document.getElementById('l-email').value.trim();
+    const pw = document.getElementById('l-pass').value;
+    const err = document.getElementById('login-error');
+    const user = users.find(u => u.email === em && u.password === pw);
+    const isDemo = em === 'demo@school.edu' && pw === 'demo1234';
+    if (!user && !isDemo) { err.classList.add('show'); return; }
+    err.classList.remove('show');
+    const name = user ? `${user.fname} ${user.lname}` : 'Demo Admin';
+    const initials = user ? (user.fname[0] + user.lname[0]).toUpperCase() : 'DA';
+    const role = user ? user.role : 'Administrator';
+    document.getElementById('d-name').textContent = name;
+    document.getElementById('d-greeting').textContent = user ? user.fname : 'Admin';
+    document.getElementById('d-avatar').textContent = initials;
+    document.getElementById('d-role').textContent = role;
+    goTo('screen-dashboard');
+  }
+
+  function doLogout() {
+    document.getElementById('l-email').value = '';
+    document.getElementById('l-pass').value = '';
+    goTo('screen-login');
+  }
+</script>
+</body>
+</html>
